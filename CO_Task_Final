@@ -252,6 +252,7 @@ CASE5_BODY:
 	addi $a1 , $zero , 1
         jal processAllRequestsWithSpecificPriority # call processAllRequestsWithSpecificPriority function to process requests
 
+	
         j EXIT_MAIN_SWITCH # go to exit main switch body (go to while loop again)
 
 CASE6_BODY:
@@ -263,6 +264,7 @@ CASEMINUS1_BODY:
 
 
 EXIT_MAIN_SWITCH:
+	addi $t9 , $zero , 1
         j WhileLoop # go to the while loop again
 
 DoneWhileLoop:
