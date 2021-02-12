@@ -469,7 +469,7 @@ deleteRequestWithSpecificPriority:
             bne $a2 , $s5 , deleteDEFAULTCASE_COND # check if the passed argument not equal 4 then we go to the default case
             beqz $s4 , ListAlreadyEmptyMessage # check if s3(low size) so the array is already empty
             addi $s4 , $zero , 0 # make the array counter = 0
-            j endProcessAndBackToMain # jump to end process and back to main
+            j listDeletedSuccessfullyMessage # jump to list deleted successfully message
 
     deleteDEFAULTCASE_COND:
             li $v0 , 4 # command for printing a string
