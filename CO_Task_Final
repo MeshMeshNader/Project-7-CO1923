@@ -14,7 +14,6 @@ del_success: 		.asciiz	        "List deleted successfully\n"
 invalid_list:	 	.asciiz	        "\nYou Entered an invalid list number please\n "
 process_empty:		.asciiz		"There's no requests here the list is empty\n"
 separator:		.asciiz 	"-----------------------------------------------\n"
-Size: 			.word 		5
 Dones: 			.asciiz 	"Done"
 enter: 			.byte		'\n'
 
@@ -29,16 +28,17 @@ Notfound_low:		.asciiz		"\nThe Request Not found in Low List"
 search_priority:	.asciiz		"\nEnter your priority number to Search:  \n1-Critical\n2-High\n3-Medium\n4-Low\n"
 
 
+Size: 			.word 	5
 critical:		.space 	20 	#Create the critical array of size 20
-high:			.space 	20 	#
-medium:			.space 	20
-low:			.space 	20
+high:			.space 	20 	#Create the high array of size 20
+medium:			.space 	20	#Create the medium array of size 20
+low:			.space 	20	#Create the low array of size 20
 
 
-criticalSize:		.word   0
-highSize:		.word	0
-mediumSize:		.word	0
-lowSize:		.word	0
+criticalSize:		.word   0	# intilize critical size to  0
+highSize:		.word	0	# intilize high size to  0
+mediumSize:		.word	0	# intilize medium size to  0
+lowSize:		.word	0	# intilize low size to  0
 
 .text
 .globl main
@@ -650,7 +650,8 @@ requestSearch:
 
 
 #$t1 criticalPos
-    la   $a0 , critical # add immidiate a1 to reg s1 -1 (critical size -1)
+    la   $a0 , critical # load adress to a0 (Load the critical list) 
+    addi $a1 , $s1, -1 # add immidiate a1 to reg s1 -1 (critical size -1)
     jal binSearch  # call binary search function
     move $t1 , $v1 # move the returned value(v1) to t1
 #$t2 highPos
