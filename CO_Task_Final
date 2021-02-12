@@ -1,0 +1,802 @@
+.data :
+
+Menu :          	.asciiz  	"\n\n0- Enter Requests\n1- Search about Request\n2- Search about priority \n3- Search about Request with Priority \n4- Delete All requests with specific priority \n5- Process All requests with specific priority \n6- Empty All Lists\n(-1) To Exit\n\nYour Choice:   "
+Entering_Req : 		.asciiz  	"Enter Number of requests that you have (maximum 80 requests):  "
+Entering_Pr_toDelete:  	.asciiz 	"Enter the priority which you want to delete their contents :   "
+Entering_Pr_toProcess: 	.asciiz 	"Enter the priority that you want to process their requests :   "
+invalid_task: 		.asciiz 	"\nYou entered an invalid number... try again:  "
+Enter_Requests:		.asciiz 	"\nEnter your request: "
+No_Space:		.asciiz		"There is no enough space in the arrays"
+All_empty: 		.asciiz         "All lists are empty now."
+search_request:		.asciiz		"\nEnter your request to Search:  "
+already_empty:	 	.asciiz	        "The list is already empty\n"
+del_success: 		.asciiz	        "List deleted successfully\n"
+invalid_list:	 	.asciiz	        "\nYou Entered an invalid list number please\n "
+process_empty:		.asciiz		"There's no requests here the list is empty\n"
+separator:		.asciiz 	"-----------------------------------------------\n"
+Size: 			.word 		5
+Dones: 			.asciiz 	"Done"
+enter: 			.byte		'\n'
+
+found_critical: 	.asciiz		"\n\nThe Request Founded in Critical List at Position : "
+Notfound_critical:	.asciiz		"\n\nThe Request Not found in Critical List"
+found_high: 		.asciiz		"\nThe Request Founded in High List at Position : "
+Notfound_high:		.asciiz		"\nThe Request Not found in High List"
+found_medium: 		.asciiz		"\nThe Request Founded in Medium List at Position : "
+Notfound_medium:	.asciiz		"\nThe Request Not found in Medium List"
+found_low: 		.asciiz		"\nThe Request Founded in Low List at Position : "
+Notfound_low:		.asciiz		"\nThe Request Not found in Low List"
+search_priority:	.asciiz		"\nEnter your priority number to Search:  \n1-Critical\n2-High\n3-Medium\n4-Low\n"
+
+
+critical:		.space 	20 	#Create the critical array of size 20
+high:			.space 	20 	#
+medium:			.space 	20
+low:			.space 	20
+
+
+criticalSize:		.word   0
+highSize:		.word	0
+mediumSize:		.word	0
+lowSize:		.word	0
+
+.text
+.globl main
+main:
+    li $t9 , 0 #load imidiate t9 to 0 and this for task
+    li $t8 , 0 #load imidiate t8 to 0 and this for priority
+    li $t7 , 0 #load imidiate t7 to 0 and this for numberOfRequests
+    li $t0 , -1 # load immidiate t0 to -1 and this for the first while loop(Exit from program)
+
+    lw $s0 , Size	#Load word size to the register s0 to use it in array index
+    lw $s1 , criticalSize #Load word the critical size to s1 to use it in the critical array index
+    lw $s2 , highSize #Load word the high size to the register s2 to use it in high array
+    lw $s3 , mediumSize #Load word the medium size to the register s3 to use it in medium size array
+    lw $s4 , lowSize #Load word the low size to the register s3 to use it in low array
+
+
+WhileLoop:
+    beq $t9 , $t0 , DoneWhileLoop #Scan choice while loop
+    li $v0, 4     #command for printing a string
+    la $a0, Menu #loading the string to print into the argument to enable the user choose what he want from the menu
+    syscall
+
+    li $v0 , 5 #comand for scanning integer (The choice)
+    syscall
+    move $t9 , $v0 # move the entered integer (choice) to t9
+
+        addi $s5 , $zero , 0 # initialize s5 to 0 to use it in switch case 0 to compare it to the choice
+        bne $t9 , $s5 , CASE1_COND #if The user enters number not equal 0 we go to case 1 condition
+        j CASE0_BODY # jump to case 0 body if the user enters 0 and execute it
+    CASE1_COND: addi $s5 , $zero , 1 # initialize s5 to 1 to use it in switch case 1 to compare it to the choice
+            bne $t9 , $s5 , CASE2_COND #if the user enters number not equal 1 so we go to the next case condition
+            j CASE1_BODY # jump to case 1 body if the user enters 1 and execute it
+    CASE2_COND: addi $s5 , $zero , 2 # initialize s5 to 2 to use it in switch case 2 to compare it to the choice
+            bne $t9 , $s5 , CASE3_COND # if the user enters number not equal 2 then go to the next switch condition
+            j CASE2_BODY #jump to case 2 if the user enters 2
+    CASE3_COND: addi $s5 , $zero , 3 # initialize s5 to 3 to use it in switch case 3 to compare it to the choice
+            bne $t9 , $s5 , CASE4_COND # if the user enters choice not equal 3 then we go to the next case condition
+            j CASE3_BODY # if the user enters number 3 then we jump to case 3 body and execute it
+    CASE4_COND: addi $s5 , $zero , 4 # initialize s5 to 4 to use it in switch case 4 to compare it to the choice
+            bne $t9 , $s5 , CASE5_COND # if the user enters number not equal 4 then we go to the next condition to check it
+            j CASE4_BODY #if the user enters number equal to 4 then we jump to case 4 body and we execute it
+    CASE5_COND: addi $s5 , $zero , 5 # initialize s5 to 5 to use it in switch case 5 to compare it to the choice
+            bne $t9 , $s5 , CASE6_COND # if the user enters number not equal 5 then we go to the next condition to check it
+            j CASE5_BODY # if the user enters 5 then we go to case 5 body and execute it
+    CASE6_COND: addi $s5 , $zero , 6 # initialize s5 to 6 to use it in switch case 6 to compare it to the choice
+            bne $t9 , $s5 , CASEMINUS1_COND #If the user enters number not equal 6 then we go to the next condition to check it
+            j CASE6_BODY #if the user enters 6 then we go to case 6 body and execute it
+    CASEMINUS1_COND: addi $s5 , $zero , -1 #initialize s5 to -1 to use it in switch case -1 to compare it to the choice
+            bne $t9 , $s5 , DEFAULTCASE_COND # now this is the end of all choices if the user enters number not equal the numbers in the menu then we go to default body and execute it
+            j CASEMINUS1_BODY # if the users enters -1 then we go to case -1 body and execute it (exit)
+    DEFAULTCASE_COND:
+            li $v0 , 4 #command for printing a string
+            la $a0 , invalid_task #load the addres to print this string
+            syscall #system call
+            j EXIT_MAIN_SWITCH #after printing this string we go to exit main switch which make us go back to the while loop
+
+CASE0_BODY:
+        li $v0, 4     #command for printing a string
+        la $a0, Entering_Req #loading the string to print into the argument to enable printing
+        syscall
+
+        li $v0 , 5 #command for scaning an integer (scan the number of requests)
+        syscall #system call
+        move $t7 , $v0 #then we move the scanned integer to register t7
+
+
+        addi $t1 , $zero , 0 #initialize the counter of the for loop $t1
+
+
+        Scan_Loop: beq $t1 , $t7 , After_Scan_Loop #loop to scan the requets from the user
+
+        addi $a0 , $zero , 0 #initialize the register a0 to 0
+        li $v0 , 4 	#command for printing string
+        la $a0 , Enter_Requests #load the adress to a0 to print the string Enter requests
+        syscall #system call
+
+
+        li $v0 , 12 # command for scanning char from user
+        syscall	#system call
+        move $a2 , $v0 # then we move the scanned char to the register a2
+
+        jal storeRequest # then we call storeRequest function
+
+        addi $t1 , $t1 ,1 # increment the counter by 1 (i++)
+        j Scan_Loop # then we go to loop again untill the condition satsified
+
+
+    After_Scan_Loop:
+        sgt $t5 , $s1 , $zero # check if the value in register s1(critical size) greater than 0 (if s1 > 0) then we set t5 to 1 (check if critical array not empty)
+        beqz $t5 , sortHigh # check if the critical size is less than zero (if the critical array is empty) then we go to sort the high array
+            la   $a0 , critical # pass the critical array as an argument
+            li   $a1 , 0 # pass the index 0 to the second argumenr
+            move $a2 , $s1 # we move the critical size to the 3rd argument
+            addi $a2 , $a2 , -1 # then we decrement size by 1 to pass it to the sort function
+            jal QUICK #calling Quick function (Quick sort)
+    sortHigh:
+        sgt $t5 , $s2 , $zero # check if the value in register s2(high size) greater than 0 (if s2 > 0) then we set t5 to 1 (check if high array not empty)
+        beqz $t5 , sortMed #check if the t0 register is equal zero so the high size will be less than or equal zero then we go to sort mid array
+            la   $a0 , high #load adress to the register a0 (Pass the high array as an argument)
+            li   $a1 , 0 #load immidiate to the register a0 (Pass 0 as an argument) first index in high array to fn. Sort
+            move $a2 , $s2 #move the value of high size to register a2
+            addi $a2 , $a2 , -1 # and then we decrement the value by 1 to pass it as an argument (Size -1)
+            jal QUICK #call Quick function (quick sort)
+
+    sortMed:
+        sgt $t5 , $s3 , $zero  # check if the value in register s3(medium size) greater than 0 (if s3 > 0) then we set t5 to 1 (check if medium array not empty)
+        beqz $t5 , sortLow # check if the value in t5 is equal to 0 (Which is meant that medium size less or equal 0) then we go to sort low array
+            la   $a0 , medium #Load adress into register a0 (Pass medium array as an argument)
+            li   $a1 , 0 #load immidiate a1 the value 0 (Pass it as argument) (The 1st index in medium array)
+            move $a2 , $s3 #move the value in register s3 to register a2
+            addi $a2 , $a2 , -1 #decrement the value in register a2 by 1 (pass size-1 as an argument to sort fn.)
+            jal QUICK # call the Quick function (Quick sort)
+
+
+    sortLow:
+        sgt $t5 , $s4 , $zero # check if the value in register s4(low size) greater than 0 (if s4 > 0) then we set t5 to 1 (check if low array not empty)
+        beqz $t5 , EXIT_MAIN_SWITCH # check if the value in register t5 is equal to 0 (Meant that value of s4 smaller than or equal zero) then we go to exit main switch body
+            la   $a0 , low #Load adress to a0 (Pass low array as an argument)
+            li   $a1 , 0 # Load immidiate a1 to 0 (Pass 0 as an argument)
+            move $a2 , $s4 # Move the value of register s4 to a2 (Pass the low size as an argument)
+            addi $a2 , $a2 , -1 # Decrement the value of a2 by 1 to pass it as an argument
+            jal QUICK # call quick function (Quick sort)
+
+
+    j EXIT_MAIN_SWITCH # jump to exit main switch body (Go to while loop again)
+
+CASE1_BODY:
+        li $v0 , 4 #Command for printing a string
+        la $a0 , search_request # load adress to a0 (The reuired String to print)
+        syscall # system call
+
+        li $v0 , 12 # command for scanning character
+        syscall # system call
+        move , $a2 , $v0 # moving the scanned character in v0 to a2
+        li $a3 , 0 # Load immidiate a3 to 0 (sent argument)
+
+
+        jal requestSearch # call request search function
+
+        j EXIT_MAIN_SWITCH # jump to exit main switch (While loop again)
+
+CASE2_BODY:
+        li $v0 , 4	# command for printing a string
+        la $a0 , search_priority # load adress to a0 (Load the required string to print)
+        syscall			 # System call
+
+        li $v0 , 5 #comand for scanning integer (The priority)
+        syscall # system call
+        move $a2 , $v0 # move the entered integer (priority) to a2
+
+        li $t0 , 5 # load immidiate t0 to 5
+
+        blt $a2 ,$zero ,prioritySearchElse # check if a2 less than zero (If priority < 0) then go to priority search else body
+        bge $a2 , $t0 ,prioritySearchElse  # check if a2 greater than t0 (priority greater than 5) go to priority search else body
+        move $a1 , $zero
+        jal processAllRequestsWithSpecificPriority # call processAllRequestsWithSpecificPriority function to process requests
+
+    prioritySearchElse:
+
+        j EXIT_MAIN_SWITCH # jump to exit main switch (While loop again)
+
+
+CASE3_BODY:
+        li $v0 , 4 # command for printing a string
+        la $a0 , search_request # load adress to a0 (load the required string to print)
+        syscall  		# system call
+
+        li $v0 , 12 # command for scanning a character
+        syscall     # system call
+        move , $a2 , $v0 # move the scanned character to a2
+
+        li $t0 , 5 # load immidiate t0 to 5
+        li $v0 , 4 # command for printing a string
+        la $a0 , search_priority # load adress to a0 (Load the required string to print)
+        syscall 		 # system call
+
+        li $v0 , 5 # comand for scanning integer (The priority)
+        syscall    # system call
+        move $a3 , $v0 # move the entered integer (priority) to $a2
+
+        blt $a3 ,$zero ,prioritySearchElse2 # check if the priority less than 0 go to prioritysearchelse2
+        bge $a3 , $t0 ,prioritySearchElse2  # check if the priority greater than or equal 5 go to prioritysearchelse2
+        jal requestSearch # jump and link binary search (Call binary search Procedure)
+
+    prioritySearchElse2:
+
+        j EXIT_MAIN_SWITCH # jump to exit main switch (While loop again)
+
+CASE4_BODY:
+        li $v0 , 4 #  command for printing a string
+        la $a0 , Entering_Pr_toDelete #  Load adress to a0 (load the required string to print)
+        syscall # system call
+
+        li $v0 , 5 #	  command for scanning an integer from the user (The priority which you want to delete requests)
+        syscall
+        move $a2 , $v0 #  Move the value of the scanned integer to the register a2
+
+        jal deleteRequestWithSpecificPriority #call the function deleteRequestWithSpecificPriority
+
+        j EXIT_MAIN_SWITCH # jump to exit main switch body (Return to while loop)
+
+CASE5_BODY:
+        li $v0 , 4 # Command for printing a string
+        la $a0 , Entering_Pr_toProcess # Load adress to the register a0 (Adress of the required string to print)
+        syscall # System call
+
+
+        li $v0 , 5 # command for scanning an integer (Priority which you want to process)
+        syscall # system call
+        move $a2 , $v0 # move the scanned value to the register a2 (Pass as an argument)
+	addi $a1 , $zero , 1
+        jal processAllRequestsWithSpecificPriority # call processAllRequestsWithSpecificPriority function to process requests
+
+        j EXIT_MAIN_SWITCH # go to exit main switch body (go to while loop again)
+
+CASE6_BODY:
+        jal emptyAllLists # Call emptyAllLists function (to empty all lists)
+        j EXIT_MAIN_SWITCH # go to exit main switch body (While loop again)
+
+CASEMINUS1_BODY:
+        j DoneWhileLoop # go to done while loop body (exit the program)
+
+
+EXIT_MAIN_SWITCH:
+        j WhileLoop # go to the while loop again
+
+DoneWhileLoop:
+		li , $v0 , 10 # command for ending the program
+		syscall # system call
+
+#----------------------End of The Main Procedure------------------------
+
+
+#---------------------Store Request Procedure----------------------------
+storeRequest:
+        addi $t2 , $zero , 0 #initialize the counter of the for Array of characters $t2
+		beq $s1 , $s0  , AddToHighArray #check if the critical size equals the size (The critical list is full?) if equal add to higharray
+		add $t2 , $zero , $s1 # adding s1 to zero and store it into t2 to use it as index of array
+
+	 	sb $a2 , critical($t2) #save the character to the memory and increment the index
+
+	 	addi $s1 , $s1 , 1 #increment the sizeVariable (Critical size) of the array
+	 	jr $ra # return to the return adress (where you stop at Main)
+
+    AddToHighArray:
+	 		beq $s2 , $s0  , AddToMedArray # check if the high size equals to the size (High array is full ?) if equal add to medium array
+			add $t2 , $zero , $s2 # add s2 to zero and store the value in t2 to use it as index
+
+	 		sb $a2 , high($t2) #save the character to the memory and increment the index
+
+	 		addi $s2 , $s2 , 1 #increment the sizeVariable(High size) of the array
+	 		jr $ra # return to the return adress (where you stop at Main)
+
+    AddToMedArray:
+	 		beq $s3 , $s0  , AddToLowArray # check if medium size equals size (Medium list is full) if equal add to low array
+			add $t2 , $zero , $s3 # add s3 to 0 and store the result in t2 to use it as index
+
+	 		sb $a2 , medium($t2) #save the character to the memory and increment the index
+
+	 		addi $s3 , $s3 , 1 #increment the sizeVariable (medium size) of the array
+	 		jr $ra # return to the return adress (where you stop at Main)
+
+    AddToLowArray:
+			beq $s4 , $s0  , storeRequestExit # check if the low size equals to size (Low list is full ?) if equal go ro store request exit body
+			add $t2 , $zero , $s4 # add s4 to 0 and store the result in t2 to use it as index
+
+	 		sb $a2 , low($t2) #save the character to the memory and increment the index
+
+	 		addi $s4 , $s4 , 1 #increment the sizeVariable (Low size) of the array
+	 		jr $ra # return to the return adress (where you stop at Main)
+
+    storeRequestExit:
+			li $v0 , 4 # command for printing a string
+			la $a0 , No_Space # Load adress to a0 To print the required string
+			syscall #system call
+			jr $ra # return to the return adress (where you stop at Main)
+
+#--------------------End Of Store Request Procedure------------------
+
+
+
+#--------------------Process All Request Procedure-------------------
+processAllRequestsWithSpecificPriority:
+
+        addi $sp , $sp , -4 # save the return value of the main procedure because of the nested procedures
+        sw   $ra , 0($sp) # store the value of stack pointer to the return adress (Main)
+
+        addi $s5 , $zero , 1	# Add immidiate 1 to $s5 to switch the argument case
+        bne $a2 , $s5 , processCASE2_COND # check if the argument priotiy not equal 1 then we go to case 2
+        add $a3 , $zero , $s1 	# save the array size to $a3
+        beqz $a3 , processEmptyMessage	# if $a3(Size) = 0 so the array is empty
+        la   $a2 , critical	# save the base index of the array in $a2
+            jal printList	# call printList procedure
+            beq $a1 , 0 , endProcessAndBackToMain
+            addi $s1 , $zero , 0	# make the array counter = 0
+            j endProcessAndBackToMain	# jump to (Call) the function endProcessAndBackToMain
+
+    processCASE2_COND:
+        addi $s5 , $zero , 2 # initialize s5 to 2
+        bne $a2 , $s5 , processCASE3_COND # check if the passed value is not equal 2 then we go to case 3
+        add $a3 , $zero , $s2 # save the array size to $a3
+        beqz $a3 , processEmptyMessage # if $a3(Size) = 0 so the array is empty
+        la   $a2 , high # save the base index of the array in $a2
+        jal printList # call printList procedure
+        beq $a1 , 0 , endProcessAndBackToMain
+        addi $s2 , $zero , 0 # make the array counter = 0
+        j endProcessAndBackToMain	# jump to (Call) the function endProcessAndBackToMain
+
+    processCASE3_COND:
+        addi $s5 , $zero , 3 # initialize s5 to 3
+        bne $a2 , $s5 , processCASE4_COND # check if the passed number not equal 3 then go to case 4 condition
+        add $a3 , $zero , $s3  # save the array size to $a3
+        beqz $a3 , processEmptyMessage # if $a3(Size) = 0 so the array is empty
+        la   $a2 , medium # save the base index of the array in $a2
+        jal printList # call printList procedure
+        beq $a1 , 0 , endProcessAndBackToMain
+        addi $s3 , $zero , 0	# make the array counter = 0
+        j endProcessAndBackToMain # jump to (Call) the function endProcessAndBackToMain
+
+    processCASE4_COND:
+        addi $s5 , $zero , 4 # initialize s5 to 4
+        bne $a2 , $s5 , processDEFAULTCASE_COND # check if the passed argument not equal 4 so we go to default case condition
+        add $a3 , $zero , $s4 # save the array size to $a3
+        beqz $a3 , processEmptyMessage # if $a3(Size) = 0 so the array is empty
+        la   $a2 , low # save the base index of the array in $a2
+        jal printList # call printList procedure
+        beq $a1 , 0 , endProcessAndBackToMain
+        addi $s4 , $zero , 0 # make the array counter = 0
+        j endProcessAndBackToMain # jump to (Call) the function endProcessAndBackToMain
+
+    processDEFAULTCASE_COND:
+        li $v0 , 4 # Command for printing string
+        la $a0 , invalid_list # Load adress to a0 (To print the required string)
+        syscall # system call
+        lw $ra , 0($sp)	 # restore (pop) the return address of the main from the stack
+        addi $sp , $sp , 4	# restore the stack pointer
+        j CASE5_BODY # if it's invalid list we go to case 5 to scan list again
+
+    processEmptyMessage:
+        li $v0 , 4 # command for printing a string
+        la $a0 , process_empty # Load adress to a0 (To print the required string)
+        syscall # system call
+        j endProcessAndBackToMain # jump to (Call) the function endProcessAndBackToMain
+
+    endProcessAndBackToMain:
+        lw $ra , 0($sp)	#restore (pop) the return address of the main from the stack
+        addi $sp , $sp , 4	#restore the stack pointer
+        jr $ra  # return to the return adress (where you stop at Main)
+
+#--------------------End of Process All Request Procedure-------------------
+
+
+#--------------------Print List Procedure------------------------
+printList:
+    addi $t2 , $zero , 0 # initialize t2 to 0
+    move $t3 , $a2 # move the passed argument a2(The base index of the array) to t3
+
+    li $v0 , 4 # command for printing string
+    la $a0 , separator # Load adress to a0 (To print the required string)
+    syscall #system call
+
+process_Loop:
+    beq $t2 , $a3 , EXIT_process_Loop # check if t2 equals the passed argument a3(array size) we go to exit proccess loop
+
+    addi $a0 , $zero , 0 # add immidiate a0 to 0 (Initialize a0 to 0)
+
+    li $v0 , 11 # Command for printing character
+    lb $a0 , 0($t3) # load the index that we want to print
+    syscall # system call
+
+    li $v0 , 11 # command for printing character
+    lb $a0 , enter # load the required string to print
+    syscall # system call
+
+    #increment the for loop conter
+    addi $t2 , $t2 ,1
+    addi $t3 , $t3 ,1
+    j process_Loop # jump to process loop again
+
+EXIT_process_Loop:
+
+    li $v0 , 4 # command for printing a string
+    la $a0 , separator # load adress to a0 (the required string to print)
+    syscall # system call
+
+    jr $ra # return to the return adress (where you stop at processAllRequestsWithSpecificPriority function)
+
+#------------------End of Print List Procedure--------------
+
+#------------------Empty all Lists Procedure--------------
+
+emptyAllLists:
+    addi $s1 , $zero , 0 # Make the critical size equal zero
+    addi $s2 , $zero , 0 # Make the high size equal zero
+    addi $s3 , $zero , 0 # Make the medium size equal zero
+    addi $s4 , $zero , 0 # Make the low size equal zero
+
+    li $v0 , 4 # command for printing string
+    la $a0 , All_empty # load adress to a0 (To print the required string)
+    syscall # system call
+
+    jr $ra # return to the return adress (where you stop at Main)
+#------------------End of Empty all Lists Procedure--------------
+
+#-----------------Delete Request Procedure---------------
+
+deleteRequestWithSpecificPriority:
+        addi $s5 , $zero , 1	# add immidiate s5 to 1 (initializr s5 to 1)
+        bne $a2 , $s5 , deleteCASE2_COND # check if the passed argument not equal 1 then go to the next condition
+        beqz $s1 , ListAlreadyEmptyMessage   #if $a3 = 0 so the array is  already empty
+        addi $s1 , $zero , 0	# make the array counter = 0
+        j listDeletedSuccessfullyMessage # jump to list deleted successfully message
+
+    deleteCASE2_COND:
+            addi $s5 , $zero , 2 # add immidiate s5 to 2(initializr s5 to 2)
+            bne $a2 , $s5 , deleteCASE3_COND # check if the passed argument not equal 2 then we go to the next case
+            beqz $s2 , ListAlreadyEmptyMessage # check if s2(High size) so the array is already empty
+            addi $s2 , $zero , 0 # make the array counter = 0
+            j listDeletedSuccessfullyMessage # jump to list deleted successfully message
+    deleteCASE3_COND:
+            addi $s5 , $zero , 3 # add immidiate s5 to 3 (initializr s5 to 3)
+            bne $a2 , $s5 , deleteCASE4_COND # check if the passed argument not equal 3 then we go to the next case
+            beqz $s3 , ListAlreadyEmptyMessage # check if s3(medium size) so the array is already empty
+            addi $s3 , $zero , 0 # make the array counter = 0
+            j listDeletedSuccessfullyMessage # jump to list deleted successfully message
+    deleteCASE4_COND:
+            addi $s5 , $zero , 4 # add immidiate s5 to 4 (initializr s5 to 4)
+            bne $a2 , $s5 , deleteDEFAULTCASE_COND # check if the passed argument not equal 4 then we go to the default case
+            beqz $s4 , ListAlreadyEmptyMessage # check if s3(low size) so the array is already empty
+            addi $s4 , $zero , 0 # make the array counter = 0
+            j endProcessAndBackToMain # jump to end process and back to main
+
+    deleteDEFAULTCASE_COND:
+            li $v0 , 4 # command for printing a string
+            la $a0 , invalid_list # load adress to a0 (to print the required string)
+            syscall # system call
+            j CASE4_BODY # jump to case 4 body (If the user enters invalid list then we go to scan again )
+
+    ListAlreadyEmptyMessage:
+            li $v0 , 4 # command for printing string
+            la $a0 , already_empty # load adress to a0 (to print the required string)
+            syscall # system call
+            jr $ra # return to the return adress (where you stop at Main)
+
+    listDeletedSuccessfullyMessage:
+            li $v0 , 4 # command for printing a string
+            la $a0 , del_success # load adress to a0 (to print the required string)
+            syscall # system call
+            jr $ra # return to the return adress (where you stop at Main)
+
+#---------------------End of Delete List Procedure-----------------------
+
+#---------------------Quicksort Procedure------------------
+
+
+QUICK:
+	# quick sort
+
+	# store $s and $ra
+	addi		$sp, $sp, -24	# Adjust sp
+	sw		$s0, 0($sp)	# store s0
+	sw		$s1, 4($sp)	# store s1
+	sw		$s2, 8($sp)	# store s2
+	sw		$a1, 12($sp)	# store a1
+	sw		$a2, 16($sp)	# store a2
+	sw		$ra, 20($sp)	# store ra
+
+	# set $s
+	move	$s0, $a1		# l = left
+	move	$s1, $a2		# r = right
+	move	$s2, $a1		# p = left
+
+	# while (l < r)
+Loop_quick1:
+	bge		$s0, $s1, Loop_quick1_done
+
+	# while (arr[l] <= arr[p] && l < right)
+Loop_quick1_1:
+	li		$t7, 1		# t7 = 1
+	# t0 = &arr[l]
+	mult	$s0, $t7
+	mflo	$t0			# t0 =  l * 4bit
+	add		$t0, $t0, $a0	# t0 = &arr[l]
+	lb		$t0, 0($t0)
+	# t1 = &arr[p]
+	mult	$s2, $t7
+	mflo	$t1			# t1 =  p * 4bit
+	add		$t1, $t1, $a0	# t1 = &arr[p]
+	lb		$t1, 0($t1)
+	# check arr[l] <= arr[p]
+	bgt		$t0, $t1, Loop_quick1_1_done
+	# check l < right
+	bge		$s0, $a2, Loop_quick1_1_done
+	# l++
+	addi	$s0, $s0, 1
+	j		Loop_quick1_1
+
+Loop_quick1_1_done:
+
+	# while (arr[r] >= arr[p] && r > left)
+Loop_quick1_2:
+	li		$t7, 1			# t7 = 4
+	# t0 = &arr[r]
+	mult	$s1, $t7
+	mflo	$t0			# t0 =  r * 4bit
+	add		$t0, $t0, $a0	# t0 = &arr[r]
+	lb		$t0, 0($t0)
+	# t1 = &arr[p]
+	mult	$s2, $t7
+	mflo	$t1			# t1 =  p * 4bit
+	add		$t1, $t1, $a0	# t1 = &arr[p]
+	lb		$t1, 0($t1)
+	# check arr[r] >= arr[p]
+	blt		$t0, $t1, Loop_quick1_2_done
+	# check r > left
+	ble		$s1, $a1, Loop_quick1_2_done
+	# r--
+	addi	$s1, $s1, -1
+	j		Loop_quick1_2
+
+Loop_quick1_2_done:
+
+	# if (l >= r)
+	blt		$s0, $s1, If_quick1_jump
+	# SWAP (arr[p], arr[r])
+	li		$t7, 1		# t7 = 4
+	# t0 = &arr[p]
+	mult	$s2, $t7
+	mflo	$t6			# t6 =  p * 4bit
+	add		$t0, $t6, $a0	# t0 = &arr[p]
+	# t1 = &arr[r]
+	mult	$s1, $t7
+	mflo	$t6			# t6 =  r * 4bit
+	add		$t1, $t6, $a0	# t1 = &arr[r]
+	# Swap
+	lb		$t2, 0($t0)
+	lb		$t3, 0($t1)
+	sb		$t3, 0($t0)
+	sb		$t2, 0($t1)
+
+	# quick(arr, left, r - 1)
+	# set arguments
+	move	$a2, $s1
+	addi	$a2, $a2, -1		# a2 = r - 1
+	jal		QUICK
+	# pop stack
+	lw		$a1, 12($sp)		# load a1
+	lw		$a2, 16($sp)		# load a2
+	lw		$ra, 20($sp)		# load ra
+
+	# quick(arr, r + 1, right)
+	# set arguments
+	move	$a1, $s1
+	addi	$a1, $a1, 1		# a1 = r + 1
+	jal		QUICK
+	# pop stack
+	lw		$a1, 12($sp)		# load a1
+	lw		$a2, 16($sp)		# load a2
+	lw		$ra, 20($sp)		# load ra
+
+	# return
+	lw		$s0, 0($sp)		# load s0
+	lw		$s1, 4($sp)		# load s1
+	lw		$s2, 8($sp)		# load s2
+	addi		$sp, $sp, 24		# Adjust sp
+	jr		$ra
+
+If_quick1_jump:
+
+# SWAP (arr[l], arr[r])
+	li		$t7, 1		# t7 = 4
+	# t0 = &arr[l]
+	mult	$s0, $t7
+	mflo	$t6			# t6 =  l * 4bit
+	add		$t0, $t6, $a0	# t0 = &arr[l]
+	# t1 = &arr[r]
+	mult	$s1, $t7
+	mflo	$t6			# t6 =  r * 4bit
+	add		$t1, $t6, $a0	# t1 = &arr[r]
+	# Swap
+	lb		$t2, 0($t0)
+	lb		$t3, 0($t1)
+	sb		$t3, 0($t0)
+	sb		$t2, 0($t1)
+
+	j		Loop_quick1
+
+Loop_quick1_done:
+
+# return
+
+	lw		$s0, 0($sp)		# load s0
+	lw		$s1, 4($sp)		# load s1
+	lw		$s2, 8($sp)		# load s2
+	addi		$sp, $sp, 24		# Adjust sp
+	jr		$ra
+
+#------------------------- End Of quick sort Procedure------------------------
+
+
+#--------------------------Request Search Procedure---------------------------
+
+requestSearch:
+	addi		$sp, $sp, -16		# Adjust sp
+	sw		$s0, 0($sp)		# store s0 before using it
+	sw		$s1, 4($sp)		# store s1 before using it
+	sw		$s2, 8($sp)		# store s2 before using it
+	sw		$ra, 12($sp)		# store ra before using it
+
+
+#$t1 criticalPos
+    la   $a0 ,  add immidiate a1 to reg s1 -1 (critical size -1)
+    jal binSearch  # call binary search function
+    move $t1 , $v1 # move the returned value(v1) to t1
+#$t2 highPos
+    la   $a0 , high # load adress to a0 (Load the high list)
+    addi $a1 , $s2 , -1 # add immidiate a1 to s2 -1 (high size -1)
+    jal binSearch # call binary search function
+    move $t2 , $v1 # move the returned value(v1) to t2
+#$t3 medPos
+    la   $a0 , medium # load adress to a0 (Load the medium list)
+    addi $a1 , $s3 , -1 # add immidiate a1 to s3 -1 (medium size -1)
+    jal binSearch # call binary search function
+    move $t3 , $v1 # Move the returned value(v1) to t3
+#$t4 lowPos
+    la   $a0 , low # load adress to a0 (Load low list)
+    addi $a1 , $s4 , -1 # add immidiate a1 to s4 -1 (low size -1)
+    jal binSearch # Call binary search function
+    move $t4 , $v1 # move the returned value(v1) to t4
+
+
+	li $s0 , 0 # load immidiate s0 to 0
+	li $s1 , 1 # load immidiate s1 to 1
+	addi $s2, $zero , -1 # add immidiate s2 to s2-1 (decrement by 1)
+
+	beq $a3 , $s1 ,IF1 # check if a3 equal s1 then we go to if1 body
+	bne $a3 , $s0 , ELSE1 # check if a3 equals s0 so we go to else1 body
+
+IF1:
+    ble $t1 , $s2 , notFoundif1 # if t1 is smaller than or equal s2 then we go to notfoundif1
+    li $v0 , 4 # command for printing string
+    la $a0 , found_critical # load adress to a0 (Load the required string to print)
+    syscall # system call
+
+    li $v0 , 1 # command for printing integer
+    move $a0 , $t1 # move the value of t1 into a0
+    syscall # system call
+    j ELSE1 # jump to else 1
+notFoundif1:
+    li $v0 , 4 # command for printing a string
+    la $a0 , Notfound_critical # load adress to a0 (Load the required string)
+    syscall # system call
+
+ELSE1:
+	li $s1 , 2 # load immidiate s1 to 2
+	beq $a3 , $s1 ,IF2 # check if the value in a3 equals to s1 (priority equals to 2) then we go to If2 body
+	bne $a3 , $s0 , ELSE2 # check if the value in a3 is not equal to s0 then we go to else2
+IF2:
+    ble $t2 , $s2 , notFoundif2 # check if t2 is less than or equal s2 and if that is right go to notfoundif2
+    li $v0 , 4 # command for printing a string
+    la $a0 , found_high # load adress to a0 (load the required string to print)
+    syscall		    # system call
+
+    li $v0 , 1 # command for printing an integer
+    move $a0 , $t2 # move the value of t2 in a0 to print
+    syscall        # system call
+    j ELSE2        # jump to else 2
+notFoundif2:
+    li $v0 , 4 # command for printing a string
+    la $a0 , Notfound_high # load adress to a0 (Load the required string to print)
+    syscall 		# system call
+
+ELSE2:
+	li $s1 , 3 # load immidiate s1 to 3
+	beq $a3 , $s1 ,IF3 # check if a3 equals to s1 (priority equal 3) then we go to IF3
+	bne $a3 , $s0 , ELSE3 # check if a3 equals to s0 (priority equal 0) Then we go to Else3
+IF3:
+     ble $t3 , $s2 , notFoundif3 # check if the value of t3 is less than or equal s2 (if t3 <= -1) then we go to not found if3
+    li $v0 , 4 # command for printing a string
+    la $a0 , found_medium # Load adress to a0 (Load the required string to print)
+    syscall			# system call
+
+    li $v0 , 1 # command for printing an integer
+    move $a0 , $t3 # move the value of t3 to a0 to print it
+    syscall # system call
+    j ELSE3 # jump to else3 body
+notFoundif3:
+    li $v0 , 4 # command for printing a string
+    la $a0 , Notfound_medium # load adress to a0 (Load the required string to print)
+    syscall			 # System call
+
+ELSE3:
+	li $s1 , 4 # load immidiate s1 to 4
+	beq $a3 , $s1 ,IF4 # check if a3 equals to s1 (priority = 4) then we go to if4 body
+	bne $a3 , $s0 , ELSE4 # check if a3 equals to s0 (priority = 0) then go to else 4
+IF4:
+    ble $t4 , $s2 , notFoundif4 # check if t4 less than or equal s2 (t4 <= -1) then go to not found if4
+    li $v0 , 4 # command for printing a string
+    la $a0 , found_low # load adress to a0 (Load the required string)
+    syscall  # system call
+
+    li $v0 , 1 # command for printing integer
+    move $a0 , $t4 # move the value in t4 to a0 to print it
+    syscall # system call
+    j ELSE4 # jump to else 4
+notFoundif4:
+    li $v0 , 4 # command for printing string
+    la $a0 , Notfound_low # load adress to a0 (Load the required string to print)
+    syscall			# system call
+
+ELSE4:
+	# (restore the old values)
+	lw		$s0, 0($sp)		# load s0
+	lw		$s1, 4($sp)		# load s1
+	lw		$s2, 8($sp)		# load s2
+	lw		$ra, 12($sp)		# load ra
+	addi		$sp, $sp, 4		# Adjust sp
+	jr		$ra			# return where you stop before calling
+
+
+#----------------------End Of Request Search Procedure------------
+
+
+
+
+
+
+#-------------------------Binary Search Procedure-----------------
+
+binSearch:
+	li $t9 , 2 # load immidiate t9 to 2
+	addi $t8 , $zero , 0 # add immidiate t8 to 0 (initialization to 0)
+whileLoop:
+	bgt $t8 , $a1 , exitSearch # check if t8 greater than a1 which is (L > r) go to exit search body
+	subu $t5 , $a1 , $t8 # subtract t8 from a1 and store the result in t5 (l-r)
+	div $t5 , $t9       # t5 divided t9 (l-r)/2
+	mflo $t5 	    # get the result value in t5
+	add $t5 , $t5 , $t8 # add t5 to t8 and store it to t5 ---> l+(r-l)/2
+	move $t7 , $a0      # move the value of a0 (the list i'am search in) to t7
+	add  $t7 , $t7 , $t5 #  add t5 to t7 and store it in t7 arr[m]
+
+	lb $t6 , 0($t7) # load byte int t6 to get the character in the index arr[m]
+
+	bne $t6 , $a2 , secondIf # check if a2 not equal t6 then go to the second if block
+    move $v1 , $t5 # if equal then move t5 to v1 (retutn m)
+    jr $ra # return to the return adress (where you stop at request search)
+
+secondIf:
+    bge $t6 , $a2 , elseIf # check if t6 greater than or equal a2 go to else if block
+    addi $t8 , $t5 , 1     # if not add immidiate t8 to t5 + 1 (l = m+1)
+    j whileLoop # jump to the while loop (jump to the loop again)
+
+elseIf:
+    addi $a1 , $t5 , -1 # add immidiate a1 to t5 - 1 (r = m - 1)
+    j  whileLoop 	    # jump to the while loop (jump to the loop again)
+
+exitSearch:
+	li $v1 , -1 # load immidiate to v1 - 1 (return -1)
+	jr $ra # return to the return adress (where you stop at request search)
+
+#--------------------
