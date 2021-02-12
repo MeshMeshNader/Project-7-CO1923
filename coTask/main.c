@@ -18,7 +18,7 @@ int  criticalSize , highSize , mediumSize , lowSize;
 int main()
 {
 
-    int numberOfRequests , priority , task;
+    int numberOfRequests = 0 , priority = 0 , task = 0;
     char request;
 
     while( task != -1){
