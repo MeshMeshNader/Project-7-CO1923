@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1608933289 source:c:\users\meshm\desktop\cotask\main.c
+	<stdio.h>
+	<stdlib.h>
+
+1613083197 source:c:\users\meshm\desktop\cotask\cotask\main.c
+	<stdio.h>
+	<stdlib.h>
+
