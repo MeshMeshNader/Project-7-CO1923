@@ -650,7 +650,7 @@ requestSearch:
 
 
 #$t1 criticalPos
-    la   $a0 ,  add immidiate a1 to reg s1 -1 (critical size -1)
+    la   $a0 , critical # add immidiate a1 to reg s1 -1 (critical size -1)
     jal binSearch  # call binary search function
     move $t1 , $v1 # move the returned value(v1) to t1
 #$t2 highPos
