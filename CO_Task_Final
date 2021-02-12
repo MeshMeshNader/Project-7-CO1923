@@ -28,7 +28,7 @@ Notfound_low:		.asciiz		"\nThe Request Not found in Low List"
 search_priority:	.asciiz		"\nEnter your priority number to Search:  \n1-Critical\n2-High\n3-Medium\n4-Low\n"
 
 
-Size: 			.word 	5
+Size: 			.word 	20
 critical:		.space 	20 	#Create the critical array of size 20
 high:			.space 	20 	#Create the high array of size 20
 medium:			.space 	20	#Create the medium array of size 20
